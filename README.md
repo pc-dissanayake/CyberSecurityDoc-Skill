@@ -49,22 +49,84 @@ security-reporting/SKILL.md
 
 ## Install
 
-Use the appropriate installer for your platform.
+Each skill is a directory containing a `SKILL.md` with YAML frontmatter (`name` + `description`) — this is [Anthropic's Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) format. **Claude Code loads it natively.** Codex CLI and Gemini CLI have no native skill loader, so for those you copy the same folders and add a one-line pointer in their context file.
 
-### Windows (PowerShell)
+### Quick install (any platform)
+
+Use the bundled installer. By default it copies to `~/.skills`; pass a target directory to override.
+
+<details>
+<summary><b>Windows (PowerShell)</b></summary>
 
 ```powershell
+# Default target (~/.skills)
 powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
 
-### macOS/Linux (bash)
+# Or install directly into Claude Code's skills folder
+powershell -ExecutionPolicy Bypass -File .\install.ps1 "$HOME\.claude\skills"
+```
+</details>
+
+<details>
+<summary><b>macOS / Linux (bash)</b></summary>
 
 ```bash
 chmod +x install.sh
+
+# Default target (~/.skills)
 ./install.sh
+
+# Or install directly into Claude Code's skills folder
+./install.sh ~/.claude/skills
+```
+</details>
+
+---
+
+### Claude Code (native)
+
+Claude Code auto-discovers skills in a `skills/` folder:
+
+- **Personal (all projects):** `~/.claude/skills/`
+- **Project (checked into repo):** `<project>/.claude/skills/`
+
+```bash
+cp -R cybersecurity-assessment web-security api-security cloud-security \
+      infrastructure-security server-security security-reporting \
+      ~/.claude/skills/
 ```
 
-The installer copies the skill directories into a local skills folder that can be used by a compatible skill runtime or referenced by a host environment.
+Run `/skills` in a session to confirm all seven appear. Claude loads `cybersecurity-assessment` automatically when a security task is described.
+
+### Codex CLI (OpenAI)
+
+Codex has no `SKILL.md` loader. Copy the skill folders into your project (e.g. `./skills/`), then point Codex at them via `AGENTS.md` (auto-read from the project root or `~/.codex/`):
+
+```markdown
+# AGENTS.md
+For security assessment work, follow ./skills/cybersecurity-assessment/SKILL.md
+and load the relevant file under ./skills/cybersecurity-assessment/references/
+on demand.
+```
+
+Alternatively, drop a skill into `~/.codex/prompts/<name>.md` to invoke it as a `/<name>` slash prompt (flat file — you lose on-demand reference loading).
+
+### Gemini CLI
+
+Gemini CLI also has no native skill loader. Use its context file plus a custom command.
+
+Add a pointer in `GEMINI.md` (project root or `~/.gemini/GEMINI.md`), same idea as `AGENTS.md` above. Then create `~/.gemini/commands/security.toml`:
+
+```toml
+description = "Load cybersecurity assessment skill"
+prompt = "Follow @{skills/cybersecurity-assessment/SKILL.md} for this security assessment."
+```
+
+Invoke with `/security`. The `@{...}` inclusion pulls in the skill, and Gemini reads the referenced files on demand.
+
+---
+
+The installer copies each skill directory (any folder containing a `SKILL.md`) into the target skills folder, where a compatible skill runtime or host environment can reference it.
 
 ## Safety model
 
