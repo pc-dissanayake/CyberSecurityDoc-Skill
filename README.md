@@ -150,3 +150,8 @@ Use the primary cybersecurity assessment skill for broad reviews, then load a fo
 - security-reporting
 
 You can extend the pack with additional skill directories as your assessment scopes expand.
+
+## Contributors
+
+- [Claude](https://github.com/claude)
+- [OpenAI Codex](https://openai.com/codex)
